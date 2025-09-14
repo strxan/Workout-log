@@ -73,7 +73,7 @@
 </div>
 
 <script>
-  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
   apiKey: "AIzaSyCvKOMoAmxWUp9-4LL9G7p-RU1jSxN2gtA",
   authDomain: "workoutlogger-3be7d.firebaseapp.com",
@@ -83,92 +83,100 @@ const firebaseConfig = {
   appId: "1:179061304083:web:55a0d4904d14235e78c8e6",
   measurementId: "G-NLKKS8RH7L"
 };
-  firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
-  const db = firebase.firestore();
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
 
-  const loginBtn = document.getElementById('loginBtn');
-  const signupBtn = document.getElementById('signupBtn');
-  const authSection = document.getElementById('authSection');
-  const workoutForm = document.getElementById('workoutForm');
-  const workoutTable = document.getElementById('workoutTable');
-  const workoutTableContainer = document.getElementById('workoutTableContainer');
-  const totalMinutes = document.getElementById('totalMinutes');
-  const totalCalories = document.getElementById('totalCalories');
-  const totalMiles = document.getElementById('totalMiles');
+const loginBtn = document.getElementById('loginBtn');
+const signupBtn = document.getElementById('signupBtn');
+const authSection = document.getElementById('authSection');
+const workoutForm = document.getElementById('workoutForm');
+const workoutTable = document.getElementById('workoutTable');
+const workoutTableContainer = document.getElementById('workoutTableContainer');
+const totalMinutes = document.getElementById('totalMinutes');
+const totalCalories = document.getElementById('totalCalories');
+const totalMiles = document.getElementById('totalMiles');
 
-  let userId = null;
+let userId = null;
 
-  auth.onAuthStateChanged(user => {
-    if(user) {
-      authSection.style.display = 'none';
-      workoutForm.style.display = 'grid';
-      workoutTableContainer.style.display = 'table';
-      userId = user.uid;
-      renderWorkouts();
-    } else {
-      authSection.style.display = 'block';
-      workoutForm.style.display = 'none';
-      workoutTableContainer.style.display = 'none';
-    }
-  });
-
-  signupBtn.addEventListener('click', () => {
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
-    auth.createUserWithEmailAndPassword(email, password)
-      .catch(err => alert(err.message));
-  });
-
-  loginBtn.addEventListener('click', () => {
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
-    auth.signInWithEmailAndPassword(email, password)
-      .catch(err => alert(err.message));
-  });
-
-  workoutForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const workout = {
-      date: document.getElementById('date').value,
-      minutes: parseInt(document.getElementById('minutes').value),
-      calories: parseInt(document.getElementById('calories').value),
-      miles: parseFloat(document.getElementById('miles').value),
-      timestamp: firebase.firestore.FieldValue.serverTimestamp()
-    };
-    await db.collection('users').doc(userId).collection('workouts').add(workout);
-    workoutForm.reset();
+auth.onAuthStateChanged(user => {
+  if(user) {
+    authSection.style.display = 'none';
+    workoutForm.style.display = 'grid';
+    workoutTableContainer.style.display = 'table';
+    userId = user.uid;
     renderWorkouts();
+  } else {
+    authSection.style.display = 'block';
+    workoutForm.style.display = 'none';
+    workoutTableContainer.style.display = 'none';
+  }
+});
+
+signupBtn.addEventListener('click', () => {
+  const email = document.getElementById('email').value;
+  const password = document.getElementById('password').value;
+  auth.createUserWithEmailAndPassword(email, password)
+    .catch(err => alert(err.message));
+});
+
+loginBtn.addEventListener('click', () => {
+  const email = document.getElementById('email').value;
+  const password = document.getElementById('password').value;
+  auth.signInWithEmailAndPassword(email, password)
+    .catch(err => alert(err.message));
+});
+
+workoutForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const milesValue = document.getElementById('miles').value;
+  const workout = {
+    date: document.getElementById('date').value,
+    minutes: parseInt(document.getElementById('minutes').value),
+    calories: parseInt(document.getElementById('calories').value),
+    miles: milesValue ? parseFloat(milesValue) : null,
+    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+  };
+  await db.collection('users').doc(userId).collection('workouts').add(workout);
+  workoutForm.reset();
+  renderWorkouts();
+});
+
+async function renderWorkouts() {
+  const snapshot = await db.collection('users').doc(userId).collection('workouts').orderBy('timestamp').get();
+  workoutTable.innerHTML = '';
+  let minutesSum = 0, caloriesSum = 0, milesSum = 0;
+
+  snapshot.forEach(doc => {
+    const w = doc.data();
+    const minutes = w.minutes ?? 0;
+    const calories = w.calories ?? 0;
+    const miles = w.miles ?? null;
+
+    minutesSum += minutes;
+    caloriesSum += calories;
+    milesSum += miles ?? 0;
+
+    workoutTable.innerHTML += `
+      <tr class="border-t">
+        <td class="p-2">${w.date}</td>
+        <td class="p-2">${minutes}</td>
+        <td class="p-2">${calories}</td>
+        <td class="p-2">${miles !== null ? miles.toFixed(2) : '—'}</td>
+        <td class="p-2"><button onclick="deleteWorkout('${doc.id}')" class="text-red-600 hover:underline">Delete</button></td>
+      </tr>
+    `;
   });
 
-  async function renderWorkouts() {
-    const snapshot = await db.collection('users').doc(userId).collection('workouts').orderBy('timestamp').get();
-    workoutTable.innerHTML = '';
-    let minutesSum = 0, caloriesSum = 0, milesSum = 0;
-    snapshot.forEach(doc => {
-      const w = doc.data();
-      minutesSum += w.minutes;
-      caloriesSum += w.calories;
-      milesSum += w.miles;
-      workoutTable.innerHTML += `
-        <tr class="border-t">
-          <td class="p-2">${w.date}</td>
-          <td class="p-2">${w.minutes}</td>
-          <td class="p-2">${w.calories}</td>
-          <td class="p-2">${w.miles.toFixed(2)}</td>
-          <td class="p-2"><button onclick="deleteWorkout('${doc.id}')" class="text-red-600 hover:underline">Delete</button></td>
-        </tr>
-      `;
-    });
-    totalMinutes.textContent = minutesSum;
-    totalCalories.textContent = caloriesSum;
-    totalMiles.textContent = milesSum.toFixed(2);
-  }
+  totalMinutes.textContent = minutesSum;
+  totalCalories.textContent = caloriesSum;
+  totalMiles.textContent = milesSum.toFixed(2);
+}
 
-  async function deleteWorkout(id) {
-    await db.collection('users').doc(userId).collection('workouts').doc(id).delete();
-    renderWorkouts();
-  }
+async function deleteWorkout(id) {
+  await db.collection('users').doc(userId).collection('workouts').doc(id).delete();
+  renderWorkouts();
+}
 </script>
 </body>
 </html>
