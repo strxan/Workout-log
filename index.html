@@ -143,35 +143,60 @@ workoutForm.addEventListener('submit', async (e) => {
 });
 
 async function renderWorkouts() {
-  const snapshot = await db.collection('users').doc(userId).collection('workouts').orderBy('timestamp').get();
+  const snapshot = await db.collection('users').doc(userId).collection('workouts').orderBy('date').get();
   workoutTable.innerHTML = '';
-  let minutesSum = 0, caloriesSum = 0, milesSum = 0;
+
+  const workoutsByMonth = {};
 
   snapshot.forEach(doc => {
     const w = doc.data();
-    const minutes = w.minutes ?? 0;
-    const calories = w.calories ?? 0;
-    const miles = w.miles ?? null;
+    const date = new Date(w.date);
+    const monthYear = date.toLocaleString("default", { month: "long", year: "numeric" });
 
-    minutesSum += minutes;
-    caloriesSum += calories;
-    milesSum += miles ?? 0;
+    if (!workoutsByMonth[monthYear]) {
+      workoutsByMonth[monthYear] = {
+        workouts: [],
+        totalMiles: 0,
+        totalCount: 0,
+        totalMinutes: 0,
+        totalCalories: 0
+      };
+    }
 
-    workoutTable.innerHTML += `
-      <tr class="border-t">
-        <td class="p-2">${w.date}</td>
-        <td class="p-2">${minutes}</td>
-        <td class="p-2">${calories}</td>
-        <td class="p-2">${miles !== null ? miles.toFixed(2) : '—'}</td>
-        <td class="p-2"><button onclick="deleteWorkout('${doc.id}')" class="text-red-600 hover:underline">Delete</button></td>
-      </tr>
-    `;
+    workoutsByMonth[monthYear].workouts.push({ id: doc.id, ...w });
+    workoutsByMonth[monthYear].totalMiles += w.miles || 0;
+    workoutsByMonth[monthYear].totalMinutes += w.minutes || 0;
+    workoutsByMonth[monthYear].totalCalories += w.calories || 0;
+    workoutsByMonth[monthYear].totalCount += 1;
   });
 
-  totalMinutes.textContent = minutesSum;
-  totalCalories.textContent = caloriesSum;
-  totalMiles.textContent = milesSum.toFixed(2);
+  // Render each month section
+  for (const month in workoutsByMonth) {
+    // Add a header row for the month
+    workoutTable.innerHTML += `
+      <tr class="bg-gray-200">
+        <td colspan="5" class="p-2 font-bold">
+          ${month} — ${workoutsByMonth[month].totalCount} workouts,
+          ${workoutsByMonth[month].totalMiles.toFixed(2)} miles
+        </td>
+      </tr>
+    `;
+
+    // Add each workout under this month
+    workoutsByMonth[month].workouts.forEach(w => {
+      workoutTable.innerHTML += `
+        <tr class="border-t">
+          <td class="p-2">${w.date}</td>
+          <td class="p-2">${w.minutes}</td>
+          <td class="p-2">${w.calories}</td>
+          <td class="p-2">${(w.miles || 0).toFixed(2)}</td>
+          <td class="p-2"><button onclick="deleteWorkout('${w.id}')" class="text-red-600 hover:underline">Delete</button></td>
+        </tr>
+      `;
+    });
+  }
 }
+
 
 async function deleteWorkout(id) {
   await db.collection('users').doc(userId).collection('workouts').doc(id).delete();
