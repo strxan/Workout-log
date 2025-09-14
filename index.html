@@ -77,128 +77,143 @@
 </div>
 
 <script>
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyCvKOMoAmxWUp9-4LL9G7p-RU1jSxN2gtA",
-  authDomain: "workoutlogger-3be7d.firebaseapp.com",
-  projectId: "workoutlogger-3be7d",
-  storageBucket: "workoutlogger-3be7d.firebasestorage.app",
-  messagingSenderId: "179061304083",
-  appId: "1:179061304083:web:55a0d4904d14235e78c8e6",
-  measurementId: "G-NLKKS8RH7L"
-};
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
-
-const loginBtn = document.getElementById('loginBtn');
-const signupBtn = document.getElementById('signupBtn');
-const authSection = document.getElementById('authSection');
-const workoutForm = document.getElementById('workoutForm');
-const workoutTable = document.getElementById('workoutTable');
-const workoutTableContainer = document.getElementById('workoutTableContainer');
-const totalMinutes = document.getElementById('totalMinutes');
-const totalCalories = document.getElementById('totalCalories');
-const totalMiles = document.getElementById('totalMiles');
-
-let userId = null;
-
-auth.onAuthStateChanged(user => {
-  if(user) {
-    authSection.style.display = 'none';
-    workoutForm.style.display = 'grid';
-    workoutTableContainer.style.display = 'table';
-    userId = user.uid;
-    renderWorkouts();
-  } else {
-    authSection.style.display = 'block';
-    workoutForm.style.display = 'none';
-    workoutTableContainer.style.display = 'none';
-  }
-});
-
-signupBtn.addEventListener('click', () => {
-  const email = document.getElementById('email').value;
-  const password = document.getElementById('password').value;
-  auth.createUserWithEmailAndPassword(email, password)
-    .catch(err => alert(err.message));
-});
-
-loginBtn.addEventListener('click', () => {
-  const email = document.getElementById('email').value;
-  const password = document.getElementById('password').value;
-  auth.signInWithEmailAndPassword(email, password)
-    .catch(err => alert(err.message));
-});
-
-workoutForm.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const milesValue = document.getElementById('miles').value;
-  const workout = {
-    date: document.getElementById('date').value,
-    minutes: parseInt(document.getElementById('minutes').value),
-    calories: parseInt(document.getElementById('calories').value),
-    miles: milesValue ? parseFloat(milesValue) : null,
-    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+  // Firebase config
+  const firebaseConfig = {
+    apiKey: "AIzaSyCvKOMoAmxWUp9-4LL9G7p-RU1jSxN2gtA",
+    authDomain: "workoutlogger-3be7d.firebaseapp.com",
+    projectId: "workoutlogger-3be7d",
+    storageBucket: "workoutlogger-3be7d.firebasestorage.app",
+    messagingSenderId: "179061304083",
+    appId: "1:179061304083:web:55a0d4904d14235e78c8e6",
+    measurementId: "G-NLKKS8RH7L"
   };
-  await db.collection('users').doc(userId).collection('workouts').add(workout);
-  workoutForm.reset();
-  renderWorkouts();
-});
+  firebase.initializeApp(firebaseConfig);
 
-async function renderWorkouts() {
-  const snapshot = await db.collection('users').doc(userId).collection('workouts').orderBy('date').get();
-  workoutTable.innerHTML = '';
+  const auth = firebase.auth();
+  const db = firebase.firestore();
 
-  const workoutsByMonth = {};
-  let minutesSum = 0, caloriesSum = 0, milesSum = 0, workoutCount = 0;
+  const loginBtn = document.getElementById('loginBtn');
+  const signupBtn = document.getElementById('signupBtn');
+  const authSection = document.getElementById('authSection');
+  const workoutForm = document.getElementById('workoutForm');
+  const workoutTableContainer = document.getElementById('workoutTableContainer');
+  const workoutTable = document.getElementById('workoutTable');
 
-  snapshot.forEach(doc => {
-    const w = doc.data();
-    const date = new Date(w.date);
-    const monthYear = date.toLocaleString("default", { month: "long", year: "numeric" });
+  const totalMinutesEl = document.getElementById('totalMinutes');
+  const totalCaloriesEl = document.getElementById('totalCalories');
+  const totalMilesEl = document.getElementById('totalMiles');
+  const totalWorkoutsEl = document.getElementById('totalWorkouts');
 
-    if (!workoutsByMonth[monthYear]) {
-      workoutsByMonth[monthYear] = {
-        workouts: [],
-        totalMiles: 0,
-        totalCount: 0,
-        totalMinutes: 0,
-        totalCalories: 0,
-        sortKey: date.getFullYear() * 100 + date.getMonth()
-      };
+  let userId = null;
+
+  auth.onAuthStateChanged(user => {
+    if(user){
+      authSection.style.display = 'none';
+      workoutForm.style.display = 'grid';
+      workoutTableContainer.style.display = 'table';
+      userId = user.uid;
+      renderWorkouts();
+    } else {
+      authSection.style.display = 'block';
+      workoutForm.style.display = 'none';
+      workoutTableContainer.style.display = 'none';
     }
-
-    workoutsByMonth[monthYear].workouts.push({ id: doc.id, ...w });
-    workoutsByMonth[monthYear].totalMiles += w.miles || 0;
-    workoutsByMonth[monthYear].totalMinutes += w.minutes || 0;
-    workoutsByMonth[monthYear].totalCalories += w.calories || 0;
-    workoutsByMonth[monthYear].totalCount += 1;
-
-    minutesSum += w.minutes || 0;
-    caloriesSum += w.calories || 0;
-    milesSum += w.miles || 0;
-    workoutCount += 1; // NEW: track total workouts
   });
 
-  // ... (rendering per month stays the same) ...
+  signupBtn.addEventListener('click', () => {
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    auth.createUserWithEmailAndPassword(email, password)
+      .catch(err => alert(err.message));
+  });
 
-  // Update overall totals at the bottom
-  totalMinutes.textContent = `${minutesSum}`;
-  totalCalories.textContent = `${caloriesSum}`;
-  totalMiles.textContent = `${milesSum.toFixed(2)}`;
-  
-  // NEW: Add workout count if you have an element for it
-  const totalWorkouts = document.getElementById('totalWorkouts');
-  if (totalWorkouts) {
-    totalWorkouts.textContent = `${workoutCount}`;
+  loginBtn.addEventListener('click', () => {
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    auth.signInWithEmailAndPassword(email, password)
+      .catch(err => alert(err.message));
+  });
+
+  workoutForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const workout = {
+      date: document.getElementById('date').value,
+      minutes: parseInt(document.getElementById('minutes').value),
+      calories: parseInt(document.getElementById('calories').value),
+      miles: parseFloat(document.getElementById('miles').value) || 0,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    };
+    await db.collection('users').doc(userId).collection('workouts').add(workout);
+    workoutForm.reset();
+    renderWorkouts();
+  });
+
+  async function renderWorkouts() {
+    const snapshot = await db.collection('users').doc(userId).collection('workouts').orderBy('date').get();
+    workoutTable.innerHTML = '';
+
+    let totalMinutes = 0;
+    let totalCalories = 0;
+    let totalMiles = 0;
+    let totalWorkouts = 0;
+
+    const workoutsByMonth = {};
+    snapshot.forEach(doc => {
+      const w = doc.data();
+      const dateObj = new Date(w.date);
+      const monthYear = dateObj.toLocaleString("default", { month: "long", year: "numeric" });
+
+      if (!workoutsByMonth[monthYear]) {
+        workoutsByMonth[monthYear] = { workouts: [], sortKey: dateObj.getFullYear() * 100 + dateObj.getMonth() };
+      }
+
+      workoutsByMonth[monthYear].workouts.push({ id: doc.id, ...w });
+
+      totalMinutes += w.minutes || 0;
+      totalCalories += w.calories || 0;
+      totalMiles += w.miles || 0;
+      totalWorkouts += 1;
+    });
+
+    // Sort months newest first
+    const sortedMonths = Object.keys(workoutsByMonth).sort((a,b) => workoutsByMonth[b].sortKey - workoutsByMonth[a].sortKey);
+
+    sortedMonths.forEach(month => {
+      const monthData = workoutsByMonth[month];
+      // Month header
+      workoutTable.innerHTML += `
+        <tr class="bg-gray-200">
+          <td colspan="5" class="p-2 font-bold">
+            ${month} — ${monthData.workouts.length} workouts,
+            ${monthData.workouts.reduce((sum,w)=>sum+(w.miles||0),0).toFixed(2)} miles
+          </td>
+        </tr>
+      `;
+      // Sort workouts newest first in month
+      monthData.workouts.sort((a,b)=> new Date(b.date) - new Date(a.date))
+        .forEach(w=>{
+          workoutTable.innerHTML += `
+            <tr class="border-t">
+              <td class="p-2">${w.date}</td>
+              <td class="p-2">${w.minutes}</td>
+              <td class="p-2">${w.calories}</td>
+              <td class="p-2">${w.miles.toFixed(2)}</td>
+              <td class="p-2"><button onclick="deleteWorkout('${w.id}')" class="text-red-600 hover:underline">Delete</button></td>
+            </tr>
+          `;
+        });
+    });
+
+    totalMinutesEl.textContent = totalMinutes;
+    totalCaloriesEl.textContent = totalCalories;
+    totalMilesEl.textContent = totalMiles.toFixed(2);
+    totalWorkoutsEl.textContent = totalWorkouts;
   }
-}
-  
-async function deleteWorkout(id) {
-  await db.collection('users').doc(userId).collection('workouts').doc(id).delete();
-  renderWorkouts();
-}
+
+  async function deleteWorkout(id) {
+    await db.collection('users').doc(userId).collection('workouts').doc(id).delete();
+    renderWorkouts();
+  }
 </script>
 </body>
 </html>
