@@ -180,16 +180,16 @@
 
     sortedMonths.forEach(month => {
       const monthData = workoutsByMonth[month];
-      // Month header with subtle borders and spacing
-          workoutTable.innerHTML += `
-            <tr class="bg-gray-200 border-t border-b border-gray-300">
-              <td colspan="5" class="py-3 px-2 font-semibold text-right text-sm text-gray-600">
-                  ${month} — ${monthData.workouts.length} workouts,
-                  ${monthData.workouts.reduce((sum,w)=>sum+(w.miles||0),0).toFixed(2)} miles
-              </td>
-            </tr>
-          `;
-
+      // Month header with calories added
+workoutTable.innerHTML += `
+  <tr class="bg-gray-200 border-t border-b border-gray-300">
+    <td colspan="5" class="py-3 px-2 font-semibold text-right text-sm text-gray-600">
+      ${month} — ${monthData.workouts.length} workouts,
+      ${monthData.workouts.reduce((sum,w)=>sum+(w.miles || 0),0).toFixed(2)} miles,
+      ${monthData.workouts.reduce((sum,w)=>sum+(w.calories || 0),0)} calories
+    </td>
+  </tr>
+`;
       // Sort workouts newest first in month
       monthData.workouts.sort((a,b)=> new Date(b.date) - new Date(a.date))
         .forEach(w=>{
