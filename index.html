@@ -47,32 +47,31 @@
   </form>
 
   <!-- Table -->
-  <div class="overflow-x-auto">
-    <table class="w-full border border-gray-300 rounded-lg overflow-hidden hidden" id="workoutTableContainer">
-      <thead class="bg-gray-200 text-gray-700">
-        <tr>
-          <th class="p-2">Date</th>
-          <th class="p-2">Minutes</th>
-          <th class="p-2">Calories</th>
-          <th class="p-2">Miles</th>
-          <th class="p-2">Action</th>
-        </tr>
-      </thead>
-      <tbody id="workoutTable" class="text-center"></tbody>
-      <tfoot class="bg-gray-100 font-bold text-gray-800">
-        <tr>
-          <td class="p-2">Totals</td>
-          <td class="p-2" id="totalMinutes">0</td>
-          <td class="p-2" id="totalCalories">0</td>
-          <td class="p-2" id="totalMiles">0</td>
-          <td></td>
-        </tr>
-      </tfoot>
-    </table>
-    <!-- Total Workouts summary line -->
-    <div class="mt-4 text-right font-bold text-gray-800">
-      Total Workouts: <span id="totalWorkouts">0</span>
-    </div>
+<div class="overflow-x-auto">
+  <table class="w-full border border-gray-300 rounded-lg overflow-hidden hidden" id="workoutTableContainer" style="table-layout: fixed;">
+    <thead class="bg-gray-200 text-gray-700 text-center">
+      <tr>
+        <th class="p-2">Date</th>
+        <th class="p-2">Minutes</th>
+        <th class="p-2">Calories</th>
+        <th class="p-2">Miles</th>
+        <th class="p-2">Action</th>
+      </tr>
+    </thead>
+    <tbody id="workoutTable" class="text-center"></tbody>
+    <tfoot class="bg-gray-100 font-bold text-gray-800 text-center">
+      <tr>
+        <td class="p-2 text-center">Totals</td>
+        <td class="p-2 text-center" id="totalMinutes">0</td>
+        <td class="p-2 text-center" id="totalCalories">0</td>
+        <td class="p-2 text-center" id="totalMiles">0</td>
+        <td class="p-2 text-center"></td>
+      </tr>
+    </tfoot>
+  </table>
+  <!-- Total Workouts summary line -->
+  <div class="mt-4 text-right font-bold text-gray-800">
+    Total Workouts: <span id="totalWorkouts">0</span>
   </div>
 </div>
 
