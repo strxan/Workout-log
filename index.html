@@ -3,14 +3,45 @@
 <head>
   <meta charset="UTF-8">
   <title>Workout Logger</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#1D4ED8">
+  <link rel="manifest" href="manifest.json">
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <style>
+    /* Mobile-friendly table */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: auto;
+      font-size: 16px;
+    }
+    td, th {
+      padding: 0.5rem;
+      text-align: center;
+      word-wrap: break-word;
+    }
+    tbody tr:nth-child(odd) {
+      background-color: #f9fafb;
+    }
+    tfoot td {
+      font-weight: bold;
+      background-color: #f3f4f6;
+    }
+    /* Optional: fix table header sticky on mobile */
+    thead th {
+      position: sticky;
+      top: 0;
+      background-color: #e5e7eb;
+      z-index: 1;
+    }
+  </style>
 </head>
 <body class="bg-gray-100 min-h-screen flex items-center justify-center">
-<div class="bg-white shadow-2xl rounded-2xl p-8 w-full max-w-2xl">
+<div class="bg-white shadow-2xl rounded-2xl p-6 w-full max-w-2xl">
   <h1 class="text-2xl font-bold mb-6 text-center">Workout Logger</h1>
 
   <!-- Login / Sign Up -->
@@ -47,31 +78,32 @@
   </form>
 
   <!-- Table -->
-<div class="overflow-x-auto">
-  <table class="w-full border border-gray-300 rounded-lg overflow-hidden hidden" id="workoutTableContainer" style="table-layout: fixed;">
-    <thead class="bg-gray-200 text-gray-700 text-center">
-      <tr>
-        <th class="p-2">Date</th>
-        <th class="p-2">Minutes</th>
-        <th class="p-2">Calories</th>
-        <th class="p-2">Miles</th>
-        <th class="p-2">Action</th>
-      </tr>
-    </thead>
-    <tbody id="workoutTable" class="text-center"></tbody>
-    <tfoot class="bg-gray-100 font-bold text-gray-800 text-center">
-      <tr>
-        <td class="p-2 text-center">Totals</td>
-        <td class="p-2 text-center" id="totalMinutes">0</td>
-        <td class="p-2 text-center" id="totalCalories">0</td>
-        <td class="p-2 text-center" id="totalMiles">0</td>
-        <td class="p-2 text-center"></td>
-      </tr>
-    </tfoot>
-  </table>
-  <!-- Total Workouts summary line -->
-  <div class="mt-4 text-right font-bold text-gray-800">
-    Total Workouts: <span id="totalWorkouts">0</span>
+  <div class="overflow-x-auto">
+    <table class="w-full border border-gray-300 rounded-lg overflow-hidden hidden" id="workoutTableContainer">
+      <thead class="bg-gray-200 text-gray-700 text-center">
+        <tr>
+          <th class="p-2">Date</th>
+          <th class="p-2">Minutes</th>
+          <th class="p-2">Calories</th>
+          <th class="p-2">Miles</th>
+          <th class="p-2">Action</th>
+        </tr>
+      </thead>
+      <tbody id="workoutTable" class="text-center"></tbody>
+      <tfoot class="bg-gray-100 font-bold text-gray-800 text-center">
+        <tr>
+          <td class="p-2 text-center">Totals</td>
+          <td class="p-2 text-center" id="totalMinutes">0</td>
+          <td class="p-2 text-center" id="totalCalories">0</td>
+          <td class="p-2 text-center" id="totalMiles">0</td>
+          <td class="p-2 text-center"></td>
+        </tr>
+      </tfoot>
+    </table>
+    <!-- Total Workouts summary line -->
+    <div class="mt-4 text-right font-bold text-gray-800">
+      Total Workouts: <span id="totalWorkouts">0</span>
+    </div>
   </div>
 </div>
 
@@ -139,7 +171,7 @@
       date: document.getElementById('date').value,
       minutes: parseInt(document.getElementById('minutes').value),
       calories: parseInt(document.getElementById('calories').value),
-      miles: parseFloat(document.getElementById('miles').value) || 0,
+      miles: document.getElementById('miles').value ? parseFloat(document.getElementById('miles').value) : null,
       timestamp: firebase.firestore.FieldValue.serverTimestamp()
     };
     await db.collection('users').doc(userId).collection('workouts').add(workout);
@@ -174,25 +206,19 @@
       totalWorkouts += 1;
     });
 
-    // Sort months newest first
     const sortedMonths = Object.keys(workoutsByMonth).sort((a,b) => workoutsByMonth[b].sortKey - workoutsByMonth[a].sortKey);
 
     sortedMonths.forEach(month => {
       const monthData = workoutsByMonth[month];
-      const monthMilesTotal = monthData.workouts.reduce((sum,w)=>sum+(w.miles || 0),0);
-
-      // Month header with calories added
       workoutTable.innerHTML += `
         <tr class="bg-gray-200 border-t border-b border-gray-300">
           <td colspan="5" class="py-3 px-2 font-semibold text-right text-sm text-gray-600">
             ${month} — ${monthData.workouts.length} workouts,
-            ${monthMilesTotal > 0 ? monthMilesTotal.toFixed(2) : '-'} miles,
-            ${monthData.workouts.reduce((sum,w)=>sum+(w.calories || 0),0)} calories
+            ${monthData.workouts.reduce((sum,w)=>sum+(w.miles||0),0).toFixed(2)} miles,
+            ${monthData.workouts.reduce((sum,w)=>sum+(w.calories||0),0)} calories
           </td>
         </tr>
       `;
-
-      // Sort workouts newest first in month
       monthData.workouts.sort((a,b)=> new Date(b.date) - new Date(a.date))
         .forEach(w=>{
           workoutTable.innerHTML += `
@@ -200,12 +226,8 @@
               <td class="p-2">${w.date}</td>
               <td class="p-2">${w.minutes}</td>
               <td class="p-2">${w.calories}</td>
-              <td class="p-2">${(w.miles && w.miles > 0) ? w.miles.toFixed(2) : '-'}</td>
-              <td class="p-2">
-                <button onclick="if(confirm('Delete this workout?')) deleteWorkout('${w.id}')" class="text-red-600 hover:underline">
-                  Delete
-                </button>
-              </td>
+              <td class="p-2">${w.miles !== null ? w.miles.toFixed(2) : '-'}</td>
+              <td class="p-2"><button onclick="deleteWorkout('${w.id}')" class="text-red-600 hover:underline">Delete</button></td>
             </tr>
           `;
         });
@@ -213,13 +235,15 @@
 
     totalMinutesEl.textContent = totalMinutes;
     totalCaloriesEl.textContent = totalCalories;
-    totalMilesEl.textContent = totalMiles > 0 ? totalMiles.toFixed(2) : '-';
+    totalMilesEl.textContent = totalMiles.toFixed(2);
     totalWorkoutsEl.textContent = totalWorkouts;
   }
 
   async function deleteWorkout(id) {
-    await db.collection('users').doc(userId).collection('workouts').doc(id).delete();
-    renderWorkouts();
+    if(confirm("Are you sure you want to delete this workout?")) {
+      await db.collection('users').doc(userId).collection('workouts').doc(id).delete();
+      renderWorkouts();
+    }
   }
 </script>
 </body>
