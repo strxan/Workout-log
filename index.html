@@ -58,7 +58,7 @@
           <th class="p-2 text-center">Action</th>
         </tr>
       </thead>
-      <tbody id="workoutTable" class="text-center"></tbody>
+      <tbody id="workoutTable"></tbody>
       <tfoot class="bg-gray-100 font-bold text-gray-800">
         <tr>
           <td class="p-2 text-left">Totals</td>
@@ -77,7 +77,6 @@
 </div>
 
 <script>
-  // Firebase config
   const firebaseConfig = {
     apiKey: "AIzaSyCvKOMoAmxWUp9-4LL9G7p-RU1jSxN2gtA",
     authDomain: "workoutlogger-3be7d.firebaseapp.com",
@@ -192,11 +191,11 @@
         .forEach(w=>{
           workoutTable.innerHTML += `
             <tr class="border-t">
-              <td class="p-2">${w.date}</td>
-              <td class="p-2">${w.minutes}</td>
-              <td class="p-2">${w.calories}</td>
-              <td class="p-2">${w.miles !== null ? w.miles.toFixed(2) : '-'}</td>
-              <td class="p-2"><button onclick="deleteWorkout('${w.id}')" class="text-red-600 hover:underline">Delete</button></td>
+              <td class="p-2 text-left">${w.date}</td>
+              <td class="p-2 text-right">${w.minutes}</td>
+              <td class="p-2 text-right">${w.calories}</td>
+              <td class="p-2 text-right">${w.miles !== null ? w.miles.toFixed(2) : '-'}</td>
+              <td class="p-2 text-center"><button onclick="deleteWorkout('${w.id}')" class="text-red-600 hover:underline">Delete</button></td>
             </tr>
           `;
         });
