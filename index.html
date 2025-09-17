@@ -180,16 +180,19 @@
 
     sortedMonths.forEach(month => {
       const monthData = workoutsByMonth[month];
+      const monthMilesTotal = monthData.workouts.reduce((sum,w)=>sum+(w.miles || 0),0);
+
       // Month header with calories added
-workoutTable.innerHTML += `
-  <tr class="bg-gray-200 border-t border-b border-gray-300">
-    <td colspan="5" class="py-3 px-2 font-semibold text-right text-sm text-gray-600">
-      ${month} — ${monthData.workouts.length} workouts,
-      ${monthData.workouts.reduce((sum,w)=>sum+(w.miles || 0),0).toFixed(2)} miles,
-      ${monthData.workouts.reduce((sum,w)=>sum+(w.calories || 0),0)} calories
-    </td>
-  </tr>
-`;
+      workoutTable.innerHTML += `
+        <tr class="bg-gray-200 border-t border-b border-gray-300">
+          <td colspan="5" class="py-3 px-2 font-semibold text-right text-sm text-gray-600">
+            ${month} — ${monthData.workouts.length} workouts,
+            ${monthMilesTotal > 0 ? monthMilesTotal.toFixed(2) : '-'} miles,
+            ${monthData.workouts.reduce((sum,w)=>sum+(w.calories || 0),0)} calories
+          </td>
+        </tr>
+      `;
+
       // Sort workouts newest first in month
       monthData.workouts.sort((a,b)=> new Date(b.date) - new Date(a.date))
         .forEach(w=>{
@@ -198,7 +201,7 @@ workoutTable.innerHTML += `
               <td class="p-2">${w.date}</td>
               <td class="p-2">${w.minutes}</td>
               <td class="p-2">${w.calories}</td>
-              <td class="p-2">${w.miles.toFixed(2)}</td>
+              <td class="p-2">${(w.miles && w.miles > 0) ? w.miles.toFixed(2) : '-'}</td>
               <td class="p-2"><button onclick="deleteWorkout('${w.id}')" class="text-red-600 hover:underline">Delete</button></td>
             </tr>
           `;
@@ -207,7 +210,7 @@ workoutTable.innerHTML += `
 
     totalMinutesEl.textContent = totalMinutes;
     totalCaloriesEl.textContent = totalCalories;
-    totalMilesEl.textContent = totalMiles.toFixed(2);
+    totalMilesEl.textContent = totalMiles > 0 ? totalMiles.toFixed(2) : '-';
     totalWorkoutsEl.textContent = totalWorkouts;
   }
 
