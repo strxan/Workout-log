@@ -55,55 +55,56 @@
   </div>
 
   <!-- Workout Form -->
-  <form id="workoutForm" class="grid grid-cols-2 gap-4 mb-6 hidden">
-    <div>
-      <label class="block mb-1 text-sm font-medium">Date</label>
-      <input type="date" id="date" required class="w-full border rounded-lg p-2">
-    </div>
-    <div>
-      <label class="block mb-1 text-sm font-medium">Minutes</label>
-      <input type="number" id="minutes" required class="w-full border rounded-lg p-2">
-    </div>
-    <div>
-      <label class="block mb-1 text-sm font-medium">Calories</label>
-      <input type="number" id="calories" required class="w-full border rounded-lg p-2">
-    </div>
-    <div>
-      <label class="block mb-1 text-sm font-medium">Miles (Optional)</label>
-      <input type="number" step="0.01" id="miles" class="w-full border rounded-lg p-2">
-    </div>
-    <div class="col-span-2 text-center">
-      <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">Add Workout</button>
-    </div>
-  </form>
+<form id="workoutForm" class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 hidden">
+  <div class="flex flex-col">
+    <label class="block mb-1 text-sm font-medium">Date</label>
+    <input type="date" id="date" required class="w-full max-w-xs border rounded-lg p-2">
+  </div>
+  <div class="flex flex-col">
+    <label class="block mb-1 text-sm font-medium">Minutes</label>
+    <input type="number" id="minutes" required class="w-full max-w-xs border rounded-lg p-2">
+  </div>
+  <div class="flex flex-col">
+    <label class="block mb-1 text-sm font-medium">Calories</label>
+    <input type="number" id="calories" required class="w-full max-w-xs border rounded-lg p-2">
+  </div>
+  <div class="flex flex-col">
+    <label class="block mb-1 text-sm font-medium">Miles (Optional)</label>
+    <input type="number" step="0.01" id="miles" class="w-full max-w-xs border rounded-lg p-2">
+  </div>
+  <div class="col-span-1 sm:col-span-2 text-center">
+    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">Add Workout</button>
+  </div>
+</form>
+
 
   <!-- Table -->
-  <div class="overflow-x-auto">
-    <table class="w-full border border-gray-300 rounded-lg overflow-hidden hidden" id="workoutTableContainer">
-      <thead class="bg-gray-200 text-gray-700 text-center">
-        <tr>
-          <th class="p-2">Date</th>
-          <th class="p-2">Minutes</th>
-          <th class="p-2">Calories</th>
-          <th class="p-2">Miles</th>
-          <th class="p-2">Action</th>
-        </tr>
-      </thead>
-      <tbody id="workoutTable" class="text-center"></tbody>
-      <tfoot class="bg-gray-100 font-bold text-gray-800 text-center">
-        <tr>
-          <td class="p-2 text-center">Totals</td>
-          <td class="p-2 text-center" id="totalMinutes">0</td>
-          <td class="p-2 text-center" id="totalCalories">0</td>
-          <td class="p-2 text-center" id="totalMiles">0</td>
-          <td class="p-2 text-center"></td>
-        </tr>
-      </tfoot>
-    </table>
-    <!-- Total Workouts summary line -->
-    <div class="mt-4 text-right font-bold text-gray-800">
-      Total Workouts: <span id="totalWorkouts">0</span>
-    </div>
+<div class="overflow-x-auto">
+  <table class="w-full border border-gray-300 rounded-lg overflow-hidden hidden" id="workoutTableContainer">
+    <thead class="bg-gray-200 text-gray-700">
+      <tr>
+        <th class="p-2 text-left min-w-[70px]">Date</th>
+        <th class="p-2 text-right min-w-[50px]">Minutes</th>
+        <th class="p-2 text-right min-w-[60px]">Calories</th>
+        <th class="p-2 text-right min-w-[50px]">Miles</th>
+        <th class="p-2 text-center">Action</th>
+      </tr>
+    </thead>
+    <tbody id="workoutTable" class="text-center"></tbody>
+    <tfoot class="bg-gray-100 font-bold text-gray-800">
+      <tr>
+        <td class="p-2 text-left">Totals</td>
+        <td class="p-2 text-right" id="totalMinutes">0</td>
+        <td class="p-2 text-right" id="totalCalories">0</td>
+        <td class="p-2 text-right" id="totalMiles">0</td>
+        <td></td>
+      </tr>
+    </tfoot>
+  </table>
+
+  <!-- Total Workouts summary line -->
+  <div class="mt-4 text-right font-bold text-gray-800">
+    Total Workouts: <span id="totalWorkouts">0</span>
   </div>
 </div>
 
